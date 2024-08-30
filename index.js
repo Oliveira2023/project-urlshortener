@@ -31,7 +31,22 @@ var urlCurta;
 app.post('/api/shorturl', function(req, res) {
   urlBody = req.body.url;
   urlCurta = urlBody.length;
-  res.json({ original_url: urlBody, short_url: urlBody.length });
+
+  const submittedUrl = url.parse(urlBody);
+  const hostname = submittedUrl.hostname;
+
+  dns.lookup(hostname, function(err, address) {
+    if (err) {
+      res.json({ error: 'invalid url' });
+    } else if (address == null) {
+      res.json({ error: 'invalid url' });
+    } else {
+      console.log('valid URL: ' + address);
+      res.json({ original_url: urlBody, short_url: urlBody.length });
+    }
+  });
+
+  
 });
 
 app.get('/api/shorturl/:url', function(req, res) {
@@ -40,16 +55,12 @@ app.get('/api/shorturl/:url', function(req, res) {
   const submittedUrl = url.parse(urlE);
   const hostname = submittedUrl.hostname;
 
-  dns.lookup(hostname, function(err, address) {
-    if (err) {
-      res.json({ error: 'invalid url' });
-    } else {
-      console.log('valid URL: ' + address);
+
       if (urlParam == urlCurta) {
       res.redirect(urlBody);
       }
-    }
-  })
+    
+
 
   
   // if (urlParam == urlCurta) {
